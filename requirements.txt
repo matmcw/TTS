@@ -1,0 +1,18 @@
+# Chatterbox TTS Audiobook Generator - Dependencies
+
+# Core TTS library
+chatterbox-tts>=0.1.4
+
+# PyTorch (install separately with CUDA support first!)
+# For CUDA 12.x: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# For CUDA 11.8: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# Audio processing
+torchaudio
+
+# Progress bars
+tqdm
+
+# Additional useful tools (optional)
+# pydub  # For audio format conversion
+# ffmpeg-python  # For audio manipulation
