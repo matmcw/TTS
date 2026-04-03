@@ -1,160 +1,68 @@
-# Chatterbox TTS Audiobook Generator
+# Local TTS
 
-A Python script for generating high-quality audiobooks from text files using Chatterbox TTS with voice cloning support.
+A general-purpose local text-to-speech tool powered by [Chatterbox](https://github.com/resemble-ai/chatterbox) with a Gradio web UI.
 
-## ✨ Features
+## Features
 
-- 🎙️ **Voice Cloning**: Clone any voice with just 6-10 seconds of audio
-- 📚 **Smart Text Processing**: Automatically splits text at sentence boundaries
-- 🔊 **High Quality Output**: 24kHz professional audio quality
-- ⚡ **GPU Accelerated**: Fast processing on NVIDIA GPUs (RTX 3060 recommended)
-- 🎨 **Emotion Control**: Natural emotional expression from Chatterbox TTS
-- 🌍 **Multilingual**: Supports 23 languages
-- 💾 **Chunk Management**: Optionally save individual chunks for debugging
-- 🔧 **Flexible**: Command-line interface with many options
+- High-quality speech synthesis
+- Voice cloning from a short reference clip (30+ seconds recommended)
+- Exaggeration, guidance, and temperature controls
 
-## 🚀 Quick Start
+## Requirements
 
-### 1. Install Dependencies
-```bash
-# Install PyTorch with CUDA support
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+- **OS:** Windows or Linux
+- **GPU:** NVIDIA with 6GB+ VRAM
+- **Python:** 3.10, 3.11, or 3.12 ([download](https://www.python.org/downloads/))
+- **RAM:** 16GB recommended
+- **Storage:** ~5GB free (model + dependencies)
 
-# Install Chatterbox TTS
-pip install chatterbox-tts
+> **Does not work on:** macOS (no CUDA), AMD GPUs, or Python 3.9 / 3.13+
 
-# Install other dependencies
-pip install tqdm
+## Setup
+
+**1. Find your CUDA version**
+
+Open a terminal and run:
+```
+nvidia-smi
+```
+Look for "CUDA Version" in the top right corner.
+
+**2. Install PyTorch with CUDA**
+
+Replace `cu128` with the version matching your GPU:
+
+| CUDA Version | Command |
+|---|---|
+| 12.8 | `pip install torch==2.8.0+cu128 torchaudio==2.8.0+cu128 --index-url https://download.pytorch.org/whl/cu128 --no-cache-dir` |
+| 12.6 | `pip install torch==2.8.0+cu126 torchaudio==2.8.0+cu126 --index-url https://download.pytorch.org/whl/cu126 --no-cache-dir` |
+| 12.4 | `pip install torch==2.8.0+cu124 torchaudio==2.8.0+cu124 --index-url https://download.pytorch.org/whl/cu124 --no-cache-dir` |
+| 12.1 | `pip install torch==2.8.0+cu121 torchaudio==2.8.0+cu121 --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir` |
+| 11.8 | `pip install torch==2.8.0+cu118 torchaudio==2.8.0+cu118 --index-url https://download.pytorch.org/whl/cu118 --no-cache-dir` |
+
+**3. Install dependencies**
+```
+pip install -r requirements.txt
 ```
 
-### 2. Basic Usage
-```bash
-# Generate with default voice
-python audiobook_generator.py example_book.txt -o audiobook.wav
+The Chatterbox model (~3GB) downloads automatically from HuggingFace on first launch.
 
-# Generate with voice cloning
-python audiobook_generator.py example_book.txt -o audiobook.wav -v voice_reference.wav
-```
+## Usage
 
-## 📖 Documentation
+**Windows:** Double-click **`launch.bat`**. The browser opens automatically once the server is ready. To stop, close the terminal window.
 
-See [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) for:
-- Complete installation instructions
-- Detailed usage examples
-- Voice cloning tips
-- Troubleshooting guide
-- Processing tips for long books
+**Linux:** Run `python app.py` and open **http://127.0.0.1:7860** in your browser.
 
-## 💻 System Requirements
+## Controls
 
-- **GPU**: NVIDIA RTX 3060 or better (6GB+ VRAM)
-- **RAM**: 16GB+ recommended
-- **Python**: 3.10 or 3.11
-- **CUDA**: 11.8 or 12.x
-- **Storage**: ~5-10GB for models and outputs
+| Control | Description |
+|---|---|
+| **Text** | Any text to synthesize |
+| **Voice Reference** | Audio clip to clone a specific voice. Without one, the model's built-in default voice is used. There is only one built-in voice. |
+| **Exaggeration** | Emotional intensity — 0.35 = calm, 0.5 = default, 0.75 = expressive, 1.0+ = dramatic |
+| **Guidance** | Pacing — lower = faster/more creative, higher = more controlled. Reduce when raising exaggeration. |
+| **Temperature** | Randomness — lower = more consistent delivery, higher = more varied prosody |
+| **Post-processing** | Adds subtle grain and early reflections for a more natural sound |
 
-## 📝 Command-Line Options
+Generated audio is automatically saved to the `out/` folder with timestamped filenames. You can also download a copy to your downloads folder via the UI.
 
-```
-usage: audiobook_generator.py [-h] [-o OUTPUT] [-v VOICE] [-c CHUNK_SIZE]
-                              [-s SILENCE] [--save-chunks] [--device {cuda,cpu}]
-                              input_file
-
-positional arguments:
-  input_file            Path to input text file (.txt)
-
-optional arguments:
-  -h, --help            Show help message
-  -o, --output          Output audio file path (default: audiobook.wav)
-  -v, --voice           Reference audio for voice cloning
-  -c, --chunk-size      Max characters per chunk (default: 500)
-  -s, --silence         Silence between chunks in seconds (default: 0.5)
-  --save-chunks         Save individual chunk audio files
-  --device              Device: cuda or cpu (default: cuda)
-```
-
-## 🎯 Example Usage
-
-```bash
-# Basic audiobook generation
-python audiobook_generator.py my_book.txt
-
-# With voice cloning and custom settings
-python audiobook_generator.py my_book.txt \
-  -o "My_Audiobook.wav" \
-  -v narrator_voice.wav \
-  -c 800 \
-  -s 0.7
-
-# Save individual chunks for debugging
-python audiobook_generator.py my_book.txt \
-  -o output.wav \
-  --save-chunks
-
-# Run on CPU (slower)
-python audiobook_generator.py my_book.txt \
-  --device cpu
-```
-
-## 📊 Expected Performance (RTX 3060)
-
-- **Processing Speed**: ~5-10 seconds per chunk
-- **100k word book**: ~2-3 hours total processing time
-- **VRAM Usage**: 6-8GB
-- **Output Quality**: 24kHz, professional audiobook quality
-
-## 🎤 Voice Cloning Tips
-
-1. **Use 6-10 seconds** of clear reference audio
-2. **No background noise** - clean speech only
-3. **Single speaker** - one voice at a time
-4. **Natural emotion** - helps the model learn expression
-5. **Good sources**: Audiobook samples, voice actor demos, LibriVox
-
-## 📁 File Structure
-
-```
-TTS/
-├── audiobook_generator.py    # Main script
-├── INSTALLATION_GUIDE.md     # Complete guide
-├── README.md                 # This file
-├── requirements.txt          # Dependencies
-└── example_book.txt          # Test file
-```
-
-## 🔧 Troubleshooting
-
-### CUDA Out of Memory
-- Reduce chunk size: `-c 300`
-- Close other GPU applications
-- Use CPU mode: `--device cpu`
-
-### Poor Voice Cloning
-- Use longer reference (10-15 seconds)
-- Ensure reference is clean and clear
-- Add natural emotion to reference
-
-### Slow Processing
-- Ensure GPU is being used: `nvidia-smi`
-- Close unnecessary applications
-- Consider processing in chapters
-
-See [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) for more troubleshooting.
-
-## 📄 License
-
-This script uses Chatterbox TTS which is licensed under MIT License by Resemble AI.
-
-## 🙏 Credits
-
-- **Chatterbox TTS**: Resemble AI (https://github.com/resemble-ai/chatterbox)
-- **PyTorch**: Facebook AI Research
-- Script by: Claude Code
-
-## 📞 Support
-
-For Chatterbox TTS issues: https://github.com/resemble-ai/chatterbox/issues
-
----
-
-**Ready to create your audiobook?** See [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) to get started!
